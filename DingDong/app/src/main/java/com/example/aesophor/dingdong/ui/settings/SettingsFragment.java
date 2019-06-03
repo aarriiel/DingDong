@@ -1,12 +1,12 @@
 package com.example.aesophor.dingdong.ui.settings;
 
-import android.graphics.drawable.Drawable;
+import android.app.Activity;
 import android.os.Bundle;
 import android.content.Intent;
+import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
-import android.support.annotation.*;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,21 +14,15 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.app.ActivityCompat;
-import android.content.pm.PackageManager;
-import android.widget.*;
 import com.example.aesophor.dingdong.MessengerActivity;
 import com.example.aesophor.dingdong.R;
 import com.example.aesophor.dingdong.network.Response;
 import com.example.aesophor.dingdong.user.User;
 import com.example.aesophor.dingdong.util.ImageUtils;
+import android.provider.MediaStore;
 
 public class SettingsFragment extends Fragment {
-    public static final int CHOOSE_PHOTO=2;
-
+    public static final int PICK_IMAGE = 1;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,7 +41,7 @@ public class SettingsFragment extends Fragment {
         final EditText passwordField = activity.findViewById(R.id.passwordField);
         Button updateButton = activity.findViewById(R.id.updateButton);
         Button avatarButton = activity.findViewById(R.id.avatarButton);
-        final ImageView avatarSet = activity.findViewById(R.id.avatarSet);
+        ImageView avatarSet = activity.findViewById(R.id.avatarSet);
 
 
         final User currentUser = activity.getUser();
@@ -55,10 +49,16 @@ public class SettingsFragment extends Fragment {
         fullnameField.setText(currentUser.getFullname());
         ImageUtils.b64LoadImage(avatarSet, currentUser.getB64Avatar());
 
-
-        avatarButton.setOnClickListener(new Button.OnClickListener(){
-            public void onClick(View v) {
-
+        avatarButton.setOnClickListener(new Button.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent getIntent = new Intent(Intent.ACTION_GET_CONTENT);
+                getIntent.setType("image/*");
+                Intent pickIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                pickIntent.setType("image/*");
+                Intent chooserIntent = Intent.createChooser(getIntent, "Select Image");
+                chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{pickIntent});
+                startActivityForResult(chooserIntent, PICK_IMAGE);
             }
         });
 
@@ -82,5 +82,12 @@ public class SettingsFragment extends Fragment {
             }
         });
     }
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == PICK_IMAGE) {
+                /*Bitmap photo = data.getParcelableExtra("data");
+                avatarSer.setImageBitmap(photo);*/
+            }
+        }
 
-}
+    }
